@@ -13,55 +13,50 @@ import clarifai2.dto.prediction.Concept;
 
 @Component("ClarifaiUtils")
 public class APIClarifaiUtils extends HiveApiFw {
-	
 
 	private static String myApiKey = "a0434fa81193491194cc7878b65d74ec";
 	
 	public APIClarifaiUtils() {
 		super(myApiKey);
+		this.setApiName("CLARIFAI");
 	}
 
 	public APIClarifaiUtils(String apiKey) {
 		super(apiKey);
+		this.setApiName("CLARIFAI");
 	}
 
-
 	@Override
-	public void detectLabels(ApiParam data, String directory) {
-		super.detectLabels(data, directory);
-		this.detectLabels(data);
-	}
-
-	
-	@Override
-	public void processImages(String imagePath) {
+	public void processImages(String imagePath, ApiParam data) {
 		ClarifaiClient client = new ClarifaiBuilder(super.getApiKey()).buildSync();
 		try {
 			List<ClarifaiOutput<Concept>> predictionResults = client.getDefaultModels().generalModel().predict()
 					.withInputs(ClarifaiInput.forImage(new File(imagePath))).executeSync().get();
 
-			System.out.println("CLARIFAI for picture : " + imagePath);
+			APIClarifaiUtils.HiveApiFwLogger.info("CLARIFAI for picture : " + imagePath);
 			for (ClarifaiOutput<Concept> prd : predictionResults) {
 				List<Concept> conceptList = prd.data();
 				conceptList.sort(new Comparator<Concept>() {
 					@Override
 					public int compare(Concept o1, Concept o2) {
-						return (int) (o1.value()-o2.value());
+						return (int) (o1.value() - o2.value());
 					}
 				});
-				for (Concept cpt :conceptList) {
-					System.out.println("label : " + cpt.name() + "- - - value : " + cpt.value());
+				for (Concept cpt : conceptList) {
+					APIClarifaiUtils.HiveApiFwLogger.fine("label : " + cpt.name() + "- - - value : " + cpt.value());
+					//Results
+					data.setApiResult(this.getApiName(), cpt);
 				}
 			}
 		} catch (Exception e) {
 			String[] errorMsg = e.getMessage().split(";");
 			for (String ms : errorMsg) {
-				System.out.println(ms);
+				APIClarifaiUtils.HiveApiFwLogger.warning(ms);
 			}
 
 		} finally {
-			System.out.println("Clarifai test performed");
+			APIClarifaiUtils.HiveApiFwLogger.fine("Clarifai test performed");
 		}
-		
+
 	}
 }

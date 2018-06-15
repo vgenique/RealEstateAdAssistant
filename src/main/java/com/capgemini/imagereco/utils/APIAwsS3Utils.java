@@ -14,7 +14,7 @@ import com.amazonaws.services.rekognition.model.Image;
 import com.amazonaws.services.rekognition.model.S3Object;
 
 public class APIAwsS3Utils extends HiveApiFw {
-	
+
 	private static String myApiKey = "";
 	// Exception message about unreachable amazon content.
 	private static final String ExceptionAmazonMsg = "Cannot load the credentials from the credential profiles file. "
@@ -27,31 +27,16 @@ public class APIAwsS3Utils extends HiveApiFw {
 
 	public APIAwsS3Utils() {
 		super(myApiKey);
+		this.setApiName("AWS_S3");
 	}
 
 	public APIAwsS3Utils(String apiKey) {
 		super(apiKey);
-	}
-
-	
-	// Accessors
-	public static AWSCredentials getCredentials() {
-		return credentials;
-	}
-
-	public static void setCredentials(AWSCredentials credentials) {
-		APIAwsS3Utils.credentials = credentials;
-	}
-
-
-	@Override
-	public void detectLabels(ApiParam data, String directory) {
-		super.detectLabels(data, directory);
-		super.detectLabels(data);
+		this.setApiName("AWS_S3");
 	}
 
 	@Override
-	public void processImages(String imageFullName) {
+	public void processImages(String imageFullName, ApiParam data) {
 		// Ensure credential retrieving is processing well.
 		try {
 			setCredentials(new ProfileCredentialsProvider(profileName).getCredentials());
@@ -69,20 +54,30 @@ public class APIAwsS3Utils extends HiveApiFw {
 		// Perform query
 		try {
 			DetectLabelsResult result = rekognitionClient.detectLabels(request);
-			System.out.println("Detected labels for " + imageFullName);
+			APIAwsS3Utils.HiveApiFwLogger.info("Detected labels for " + imageFullName);
 			result.getLabels().forEach(lb -> {
-				System.out.println(lb.getName() + " : " + lb.getConfidence().toString());
+				APIAwsS3Utils.HiveApiFwLogger.info(lb.getName() + " : " + lb.getConfidence().toString());
+				data.setApiResult(getApiName(), lb);
+				
 			});
 		} catch (AmazonRekognitionException e) {
 			String[] errorMsg = e.getMessage().split(";");
 			for (String tt : errorMsg) {
-				System.out.println(tt);
+				APIAwsS3Utils.HiveApiFwLogger.info(tt);
 			}
-			System.out.println(e.getErrorMessage());
 		} finally {
-			System.out.println("AWS query tested");
+			APIAwsS3Utils.HiveApiFwLogger.info("AWS query tested");
 		}
 
+	}
+
+	// Accessors
+	public static AWSCredentials getCredentials() {
+		return credentials;
+	}
+
+	public static void setCredentials(AWSCredentials credentials) {
+		APIAwsS3Utils.credentials = credentials;
 	}
 
 }

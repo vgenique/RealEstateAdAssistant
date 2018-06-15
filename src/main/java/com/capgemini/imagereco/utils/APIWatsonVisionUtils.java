@@ -18,22 +18,22 @@ public class APIWatsonVisionUtils extends HiveApiFw {
 
 	public APIWatsonVisionUtils() {
 		super(myApiKey);
+		this.setApiName("IBM_WATSON");
 	}
 
 	public APIWatsonVisionUtils(String apiKey) {
 		super(apiKey);
+		this.setApiName("IBM_WATSON");
 	}
 
 	@Override
-	public void detectLabels(ApiParam data, String directory) {
-		super.detectLabels(data, directory);
-		super.detectLabels(data);
+	public void setLocalPictureList(ApiParam data, String directory) {
+		super.setLocalPictureList(data, directory);
+		super.detectWebLabels(data);
 	}
 
-	
-
 	@Override
-	public void processImages(String imageFullName) {
+	public void processImages(String imageFullName, ApiParam data) {
 		Builder myOptions = new IamOptions.Builder().apiKey(this.apiKey);
 		VisualRecognition service = new VisualRecognition(this.versionDate, myOptions.build());
 		try {
@@ -43,12 +43,13 @@ public class APIWatsonVisionUtils extends HiveApiFw {
 			ClassifyOptions classifyOpitons = new ClassifyOptions.Builder().imagesFile(imagesStream)
 					.imagesFilename(imagesStream.getName()).threshold((float) 0.6).owners(owners).build();
 			ClassifiedImages result = service.classify(classifyOpitons).execute();
-			System.out.println("IBM WATSON DETAIL TEST");
-			System.out.println(result);
+			APIWatsonVisionUtils.HiveApiFwLogger.info("IBM WATSON DETAIL TEST");
+			APIWatsonVisionUtils.HiveApiFwLogger.info(result.toString());
+			data.setApiResult(this.getApiName(), result);
 		} catch (FileNotFoundException e) {
-			System.out.println(e.getMessage());
+			APIWatsonVisionUtils.HiveApiFwLogger.info(e.getMessage());
 		} finally {
-			System.out.println("IBM WATSON TEST OVER");
+			APIWatsonVisionUtils.HiveApiFwLogger.info("IBM WATSON TEST OVER");
 		}
 	}
 

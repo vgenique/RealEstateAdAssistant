@@ -31,10 +31,10 @@ public class ImageRecoApplication {
 		ibmWatsonUtils = new APIWatsonVisionUtils();
 		azurVision = new APIAzurVision();
 		// Test APIs
-		// s3Utils.detectLabels(myData, directory);
-		clarifaiUtils.detectLabels(myData, directory);
-		// ibmWatsonUtils.detectLabels(myData, directory);
-		 //azurVision.detectLabels(myData, directory);
+		// s3Utils.execImageApiQuery(directory, myData);
+		clarifaiUtils.execImageApiQuery(directory, myData);
+		// ibmWatsonUtils.execImageApiQuery(directory, myData);
+		// azurVision.execImageApiQuery(directory, myData);
 	}
 
 }

@@ -9,13 +9,10 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class APIAzurVision extends HiveApiFw {
 
@@ -33,21 +30,16 @@ public class APIAzurVision extends HiveApiFw {
 
 	public APIAzurVision() {
 		super(myApiKey);
+		this.setApiName("AZUR_VISION");
 	}
 
 	public APIAzurVision(String apiKey) {
 		super(apiKey);
-	}
-	
-
-	@Override
-	public void detectLabels(ApiParam data, String directory) {
-		super.detectLabels(data, directory);
-		super.detectLabels(data);
+		this.setApiName("AZUR_VISION");
 	}
 
 	@Override
-	public void processImages(String imageFullName) {
+	public void processImages(String imageFullName, ApiParam data) {
 		// Init an http client
 		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 		try {
@@ -64,34 +56,33 @@ public class APIAzurVision extends HiveApiFw {
 			request.setHeader(headerTypeKey, headerTypeVal);
 			request.setHeader(headerSubKey, myApiKey);
 			File tmpFile = new File(imageFullName);
-			//TODO : Fix the issue with 'only use URL images
+			// TODO : Fix the issue with 'only use URL images
 			String myUrlFile = tmpFile.toURI().toURL().toString();
-			System.out.println(myUrlFile);
 			// Set request body
-			StringEntity requestEntity = new StringEntity(
-					urlPrefix +myUrlFile+ urlSuffix);
+			StringEntity requestEntity = new StringEntity(urlPrefix + myUrlFile + urlSuffix);
 			request.setEntity(requestEntity);
-			
+
 			// Make the REST API call and get the response entity
 			HttpResponse response = httpClient.execute(request);
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
 				String jsonStr = EntityUtils.toString(entity);
-				System.out.println("AZUR VISION API TEST");
-				System.out.println(jsonStr);
+				APIAzurVision.HiveApiFwLogger.info("AZUR VISION API TEST");
+				APIAzurVision.HiveApiFwLogger.info(jsonStr);
+				data.setApiResult(getApiName(), jsonStr);
 			}
 		} catch (URISyntaxException e) {
-			System.out.println(e.getMessage());
+			APIAzurVision.HiveApiFwLogger.info(e.getMessage());
 		} catch (UnsupportedEncodingException e) {
-			System.out.println(e.getMessage());
+			APIAzurVision.HiveApiFwLogger.info(e.getMessage());
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
+			APIAzurVision.HiveApiFwLogger.info(e.getMessage());
 		}
 		// catch (JSONException e) {
 		// System.out.println(e.getMessage());
 		// }
 		finally {
-			System.out.println("AZUR TEST OVER");
+			APIAzurVision.HiveApiFwLogger.info("AZUR TEST OVER");
 		}
 
 	}

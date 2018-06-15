@@ -10,12 +10,22 @@ import java.util.List;
  *            : Objects defining properties
  */
 public interface IApiUtils<T extends IApiParam> {
+
 	/**
-	 * Testing values
+	 * Main method to query for image analysis through API
+	 * 
+	 * @param directory
+	 * @param data
+	 * @return boolean : to ensure every process performed successfully
+	 */
+	public boolean execImageApiQuery(String directory, T data);
+
+	/**
+	 * Detect labels recover from api
 	 * 
 	 * @param data
 	 */
-	public void detectLabels(T data);
+	public void detectWebLabels(T data);
 
 	/**
 	 * Detect label for pictures found within a directory
@@ -23,7 +33,7 @@ public interface IApiUtils<T extends IApiParam> {
 	 * @param data
 	 * @param directory
 	 */
-	default void detectLabels(T data, String directory) {
+	default void setLocalPictureList(T data, String directory) {
 		System.out.println("Handling directory path too");
 	};
 
@@ -35,5 +45,6 @@ public interface IApiUtils<T extends IApiParam> {
 	 * @return
 	 */
 	public List<String> setFilesPictureName(String directory);
+	
 
 }
